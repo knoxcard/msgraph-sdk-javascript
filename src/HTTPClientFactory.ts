@@ -29,8 +29,8 @@ export class HTTPClientFactory {
      * @returns A HTTPClient instance
      */
     public static createWithAuthenticationProvider(authProvider: AuthenticationProvider): HTTPClient {
-        let authenticationHandler = new AuthenticationHandler(authProvider);
-        let httpMessageHandler = new HTTPMessageHandler();
+        let authenticationHandler = new AuthenticationHandler(authProvider),
+            httpMessageHandler = new HTTPMessageHandler();
         authenticationHandler.setNext(httpMessageHandler);
         return HTTPClientFactory.createWithMiddleware(authenticationHandler);
     }

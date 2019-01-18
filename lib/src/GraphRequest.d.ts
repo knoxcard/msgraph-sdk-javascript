@@ -7,6 +7,7 @@
 import { HTTPClient } from "./HTTPClient";
 import { ClientOptions } from "./IClientOptions";
 import { GraphRequestCallback } from "./IGraphRequestCallback";
+import { MiddlewareOption } from "./IMiddlewareOption";
 import { ResponseType } from "./ResponseType";
 /**
  * @interface
@@ -76,6 +77,11 @@ export declare class GraphRequest {
     private _options;
     /**
      * @private
+     * A member to hold the array of middleware options for a request
+     */
+    private _middlewareOptions;
+    /**
+     * @private
      * A member to hold custom response type for a request
      */
     private _responseType;
@@ -125,6 +131,13 @@ export declare class GraphRequest {
     options(options: {
         [key: string]: any;
     }): GraphRequest;
+    /**
+     * @public
+     * Sets the middleware options for a request
+     * @param {MiddlewareOption[]} options - The array of middleware options
+     * @returns The same GraphRequest instance that is being called with
+     */
+    middlewareOptions(options: MiddlewareOption[]): GraphRequest;
     /**
      * @public
      * Sets the api endpoint version for a request

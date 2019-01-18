@@ -18,6 +18,8 @@ import { HTTPClient } from "./HTTPClient";
 import { ClientOptions } from "./IClientOptions";
 import { GraphRequestCallback } from "./IGraphRequestCallback";
 import { FetchOptions } from "./IFetchOptions";
+import { MiddlewareOption } from "./IMiddlewareOption";
+import { MiddlewareControl } from "./MiddlewareControl";
 import { RequestMethod } from "./RequestMethod";
 import { ResponseType } from "./ResponseType";
 
@@ -101,6 +103,12 @@ export class GraphRequest {
 
     /**
      * @private
+     * A member to hold the array of middleware options for a request
+     */
+    private _middlewareOptions: MiddlewareOption[];
+
+    /**
+     * @private
      * A member to hold custom response type for a request
      */
     private _responseType: ResponseType;
@@ -121,8 +129,9 @@ export class GraphRequest {
             oDataQueryParams: {},
             otherURLQueryParams: {}
         };
-        self._options = {};
         self._headers = {};
+        self._options = {};
+        self._middlewareOptions = [];
         self.parsePath(path);
     }
 
@@ -232,6 +241,18 @@ export class GraphRequest {
         for (let key in options) {
             self._options[key] = options[key];
         }
+        return self;
+    }
+
+    /**
+     * @public
+     * Sets the middleware options for a request
+     * @param {MiddlewareOption[]} options - The array of middleware options
+     * @returns The same GraphRequest instance that is being called with
+     */
+    public middlewareOptions(options: MiddlewareOption[]): GraphRequest {
+        let self = this;
+        self._middlewareOptions = options;
         return self;
     }
 
@@ -481,7 +502,7 @@ export class GraphRequest {
         }
         Object.assign(options, self._options);
         Object.assign(optionsHeaders, defaultHeaders);
-        if(options.headers !== undefined) {
+        if (options.headers !== undefined) {
             Object.assign(optionsHeaders, options.headers);
         }
         Object.assign(optionsHeaders, self._headers);
@@ -499,10 +520,14 @@ export class GraphRequest {
      */
     private async send(request: RequestInfo, options: FetchOptions, callback?: GraphRequestCallback): Promise<any> {
         let self = this,
-            middlewareOptions = Object.assign({}, self.config.middlewareOptions);
+            middlewareControl = new MiddlewareControl(self._middlewareOptions);
         self.updateRequestOptions(options);
         try {
-            let context = await self.httpClient.sendRequest(request, options, middlewareOptions),
+            let context = await self.httpClient.sendRequest({
+                request,
+                options,
+                middlewareControl
+            }),
                 rawResponse = context.response;
             self.graphResponseHandler = new GraphResponseHandler(rawResponse, self._responseType, callback);
             let response: any = await self.graphResponseHandler.getResponse();

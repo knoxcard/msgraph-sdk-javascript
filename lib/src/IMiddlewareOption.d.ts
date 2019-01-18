@@ -7,8 +7,6 @@
 /**
  * @interface
  * Signature representing the middleware options
- * @property {[key: string]: any} - The key value pair for request options
  */
-export interface MiddlewareOptions {
-    [key: string]: any;
+export interface MiddlewareOption {
 }
